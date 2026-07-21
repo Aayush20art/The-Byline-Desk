@@ -64,7 +64,36 @@ html, body, [class*="css"]{
   background:
     radial-gradient(1100px 500px at 12% -10%, #1B2130 0%, transparent 60%),
     radial-gradient(900px 500px at 100% 0%, #1A2A24 0%, transparent 55%),
+    radial-gradient(700px 400px at 50% 100%, #1D1A14 0%, transparent 60%),
     var(--ink);
+  background-size: 180% 180%, 180% 180%, 180% 180%, 100% 100%;
+  animation: driftBg 26s ease-in-out infinite;
+}
+@keyframes driftBg{
+  0%{   background-position: 12% -10%, 100% 0%, 50% 100%, 0 0; }
+  50%{  background-position: 22% 6%,   88% 12%, 46% 88%,  0 0; }
+  100%{ background-position: 12% -10%, 100% 0%, 50% 100%, 0 0; }
+}
+
+/* drifting ink motes across the whole page — pure ambience */
+.stApp::before{
+  content:'';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, rgba(201,162,39,0.35) 0, transparent 60%),
+    radial-gradient(2px 2px at 75% 15%, rgba(201,162,39,0.25) 0, transparent 60%),
+    radial-gradient(1.5px 1.5px at 60% 70%, rgba(216,219,227,0.25) 0, transparent 60%),
+    radial-gradient(1.5px 1.5px at 90% 60%, rgba(216,219,227,0.2) 0, transparent 60%),
+    radial-gradient(2px 2px at 35% 85%, rgba(201,162,39,0.2) 0, transparent 60%);
+  background-repeat: no-repeat;
+  animation: floatMotes 18s ease-in-out infinite;
+}
+@keyframes floatMotes{
+  0%,100%{ transform: translateY(0px); }
+  50%{ transform: translateY(-22px); }
 }
 
 /* ---------------- Sidebar: the desk drawer ---------------- */
@@ -125,11 +154,26 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 
 /* ---------------- Masthead ---------------- */
 .masthead{
+  position: relative;
   text-align:center;
   padding: 1.6rem 0 1.1rem 0;
   border-bottom: 3px double var(--gold);
   margin-bottom: 1.8rem;
   animation: fadeDown .7s ease both;
+  overflow: hidden;
+}
+.masthead::after{
+  content:'';
+  position:absolute;
+  top:0; bottom:0; left:-40%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(201,162,39,0.16), transparent);
+  animation: shimmerSweep 6s ease-in-out infinite;
+}
+@keyframes shimmerSweep{
+  0%{ left:-40%; }
+  55%{ left:110%; }
+  100%{ left:110%; }
 }
 .masthead h1{
   font-family: 'Zilla Slab', serif;
@@ -138,6 +182,11 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   color: #F3ECDA;
   letter-spacing: .01em;
   margin: 0;
+  animation: glowPulse 5s ease-in-out infinite;
+}
+@keyframes glowPulse{
+  0%,100%{ text-shadow: 0 0 0 rgba(243,236,218,0); }
+  50%{ text-shadow: 0 0 18px rgba(243,236,218,0.28); }
 }
 .masthead .tagline{
   font-family: 'Source Serif 4', serif;
@@ -145,6 +194,13 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   color: var(--muted);
   font-size: 1.02rem;
   margin-top: .3rem;
+}
+.masthead .tagline::after{
+  content:'▍';
+  display:inline-block;
+  margin-left:.15rem;
+  color: var(--gold);
+  animation: blink 1.1s steps(1) infinite;
 }
 .masthead .meta{
   font-family: 'IBM Plex Mono', monospace;
@@ -157,6 +213,11 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 @keyframes fadeDown{
   from{ opacity:0; transform: translateY(-14px); }
   to{ opacity:1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .stApp, .stApp::before, .masthead::after, .masthead h1, .masthead .tagline::after,
+  .empty-desk .glyph, .empty-desk, .stButton > button{ animation: none !important; }
 }
 
 /* ---------------- Status ticker while the graph runs ---------------- */
@@ -326,17 +387,86 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 }
 .copy-btn:hover{ background: var(--gold); color:#171208; transform: translateY(-1px); }
 
-/* Empty state */
+/* Empty state — the homepage moment */
 .empty-desk{
+  position: relative;
   text-align:center;
-  padding: 3.2rem 1rem;
+  padding: 4.2rem 1rem 3.6rem 1rem;
   color: var(--muted);
   border: 1px dashed var(--panel-line);
-  border-radius: 8px;
-  animation: fadeIn .5s ease both;
+  border-radius: 10px;
+  animation: fadeIn .6s ease both, borderGlow 4s ease-in-out infinite;
+  overflow: hidden;
 }
-.empty-desk .glyph{ font-size:2.4rem; margin-bottom:.6rem; opacity:.7; }
-.empty-desk h4{ font-family:'Zilla Slab', serif; color:#D8DBE3; margin: 0 0 .3rem 0; }
+.empty-desk::before{
+  content:'';
+  position:absolute; inset:0;
+  background: radial-gradient(420px 220px at 50% 0%, rgba(201,162,39,0.08), transparent 70%);
+  animation: floatMotes 9s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes borderGlow{
+  0%,100%{ border-color: var(--panel-line); box-shadow: 0 0 0 rgba(201,162,39,0); }
+  50%{ border-color: rgba(201,162,39,0.55); box-shadow: 0 0 30px rgba(201,162,39,0.08) inset; }
+}
+.empty-desk .glyph{
+  font-size:3rem;
+  margin-bottom:.8rem;
+  opacity:.85;
+  display:inline-block;
+  animation: bob 3.2s ease-in-out infinite;
+}
+@keyframes bob{
+  0%,100%{ transform: translateY(0) rotate(-2deg); }
+  50%{ transform: translateY(-12px) rotate(2deg); }
+}
+.empty-desk h4{
+  font-family:'Zilla Slab', serif;
+  color:#D8DBE3;
+  font-size: 1.5rem;
+  margin: 0 0 .4rem 0;
+  letter-spacing:.01em;
+}
+.empty-desk .sub{
+  font-family:'Source Serif 4', serif;
+  font-style: italic;
+  font-size: 1rem;
+  position: relative;
+  z-index:1;
+}
+.empty-desk .hint{
+  display:inline-block;
+  margin-top:1.2rem;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:.68rem;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color: var(--gold);
+  opacity:.85;
+  position: relative;
+  z-index:1;
+  animation: hintPulse 2.4s ease-in-out infinite;
+}
+@keyframes hintPulse{
+  0%,100%{ opacity:.5; }
+  50%{ opacity:1; }
+}
+
+/* idle glow ring on the primary CTA so the empty page still feels alive */
+.stButton > button{ position: relative; }
+.stButton > button::after{
+  content:'';
+  position:absolute; inset:-3px;
+  border-radius: 5px;
+  border: 1px solid rgba(201,162,39,0.5);
+  opacity:0;
+  animation: ctaPulse 2.6s ease-out infinite;
+  pointer-events:none;
+}
+@keyframes ctaPulse{
+  0%{ opacity:.55; transform: scale(1); }
+  100%{ opacity:0; transform: scale(1.12); }
+}
 
 /* Key warning */
 .key-warning{
@@ -593,7 +723,8 @@ if not records:
     <div class="empty-desk">
       <div class="glyph">🗞️</div>
       <h4>The desk is empty</h4>
-      <div>Give it a topic in the sidebar and hit <em>Send to the desk</em>.</div>
+      <div class="sub">Waiting on tonight's story.</div>
+      <div class="hint">Type a topic in the sidebar → Send to the desk</div>
     </div>
     """, unsafe_allow_html=True)
 else:
@@ -644,8 +775,7 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
-    # Copy button for the best/final draft
-    best_draft = records[-1]["draft"].replace("`", "\\`").replace("\n", "\\n").replace("'", "\\'")
-    st.markdown(f"""
-    <button class="copy-btn" onclick="navigator.clipboard.writeText('{best_draft}')">📋 Copy latest draft</button>
-    """, unsafe_allow_html=True)
+    # Copy button for the best/final draft — st.code() ships its own
+    # reliable copy icon, so we don't hand-roll JS/HTML escaping.
+    st.markdown("<div class='label' style='margin-bottom:.3rem;'>Latest draft — click the copy icon on hover</div>", unsafe_allow_html=True)
+    st.code(records[-1]["draft"], language=None)
