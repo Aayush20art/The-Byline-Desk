@@ -41,19 +41,19 @@ st.markdown("""
 
 <style>
 :root{
-  --ink:        #04100A;
-  --panel:      #0A1A13;
-  --panel-line: #1E3A2A;
+  --ink:        #12100D;
+  --panel:      #1B1712;
+  --panel-line: #332A1C;
   --paper:      #F6F1E4;
   --paper-edge: #E7DEC8;
   --ink-text:   #221F1A;
-  --neon:       #35F2A0;
-  --neon-d:     #0E6B44;
-  --approve:    #2FD1C4;
-  --approve-d:  #103F3A;
-  --reject:     #E6483D;
-  --reject-d:   #4A130F;
-  --muted:      #8FAFA0;
+  --accent:     #E8A33D;
+  --accent-d:   #8C5A16;
+  --approve:    #5FB58A;
+  --approve-d:  #1F4A38;
+  --reject:     #D9524A;
+  --reject-d:   #4A1512;
+  --muted:      #A69B87;
   --paper2:     #efe7d4;
 }
 
@@ -63,9 +63,9 @@ html, body, [class*="css"]{
 
 .stApp{
   background:
-    radial-gradient(1100px 500px at 12% -10%, #0E3323 0%, transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, #0A2A1D 0%, transparent 55%),
-    radial-gradient(800px 460px at 50% 105%, rgba(53,242,160,0.10) 0%, transparent 65%),
+    radial-gradient(1100px 500px at 12% -10%, #2B2013 0%, transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, #241B10 0%, transparent 55%),
+    radial-gradient(800px 460px at 50% 105%, rgba(232,163,61,0.10) 0%, transparent 65%),
     var(--ink);
   background-size: 180% 180%, 180% 180%, 180% 180%, 100% 100%;
   animation: driftBg 26s ease-in-out infinite;
@@ -84,11 +84,11 @@ html, body, [class*="css"]{
   pointer-events: none;
   z-index: 0;
   background-image:
-    radial-gradient(2px 2px at 20% 30%, rgba(53,242,160,0.55) 0, transparent 60%),
-    radial-gradient(2px 2px at 75% 15%, rgba(53,242,160,0.4) 0, transparent 60%),
-    radial-gradient(1.5px 1.5px at 60% 70%, rgba(107,255,192,0.35) 0, transparent 60%),
-    radial-gradient(1.5px 1.5px at 90% 60%, rgba(107,255,192,0.3) 0, transparent 60%),
-    radial-gradient(2px 2px at 35% 85%, rgba(53,242,160,0.35) 0, transparent 60%);
+    radial-gradient(2px 2px at 20% 30%, rgba(232,163,61,0.55) 0, transparent 60%),
+    radial-gradient(2px 2px at 75% 15%, rgba(232,163,61,0.4) 0, transparent 60%),
+    radial-gradient(1.5px 1.5px at 60% 70%, rgba(245,199,122,0.35) 0, transparent 60%),
+    radial-gradient(1.5px 1.5px at 90% 60%, rgba(245,199,122,0.3) 0, transparent 60%),
+    radial-gradient(2px 2px at 35% 85%, rgba(232,163,61,0.35) 0, transparent 60%);
   background-repeat: no-repeat;
   animation: floatMotes 18s ease-in-out infinite;
 }
@@ -99,7 +99,7 @@ html, body, [class*="css"]{
 
 /* ---------------- Sidebar: the desk drawer ---------------- */
 section[data-testid="stSidebar"]{
-  background: linear-gradient(180deg, #0B1912 0%, #060F0A 100%);
+  background: linear-gradient(180deg, #17130E 0%, #0E0B07 100%);
   border-right: 1px solid var(--panel-line);
 }
 section[data-testid="stSidebar"] * { color: #D8DBE3; }
@@ -116,7 +116,7 @@ section[data-testid="stSidebar"] label{
 }
 section[data-testid="stSidebar"] .stTextInput input,
 section[data-testid="stSidebar"] .stTextArea textarea{
-  background: #071510;
+  background: #100C08;
   border: 1px solid var(--panel-line);
   color: #EFE9DA;
   font-family: 'Source Serif 4', serif;
@@ -124,8 +124,8 @@ section[data-testid="stSidebar"] .stTextArea textarea{
 }
 section[data-testid="stSidebar"] .stTextInput input:focus,
 section[data-testid="stSidebar"] .stTextArea textarea:focus{
-  border-color: var(--neon);
-  box-shadow: 0 0 0 3px rgba(53,242,160,0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(232,163,61,0.15);
 }
 
 /* ---------------- Buttons everywhere ---------------- */
@@ -134,23 +134,23 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   font-size: 0.8rem;
   letter-spacing: .08em;
   text-transform: uppercase;
-  background: var(--neon);
-  color: #04140D;
+  background: var(--accent);
+  color: #1C1204;
   border: none;
   border-radius: 3px;
   padding: 0.6rem 1.1rem;
   font-weight: 600;
   transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease;
-  box-shadow: 0 2px 0 #0E6B44, 0 6px 14px rgba(0,0,0,.45);
+  box-shadow: 0 2px 0 #8C5A16, 0 6px 14px rgba(0,0,0,.45);
 }
 .stButton > button:hover{
   transform: translateY(-2px) scale(1.015);
-  background: #6BFFC0;
-  box-shadow: 0 4px 0 #0E6B44, 0 12px 22px rgba(0,0,0,.55);
+  background: #F5C77A;
+  box-shadow: 0 4px 0 #8C5A16, 0 12px 22px rgba(0,0,0,.55);
 }
 .stButton > button:active{
   transform: translateY(1px) scale(.99);
-  box-shadow: 0 1px 0 #0E6B44;
+  box-shadow: 0 1px 0 #8C5A16;
 }
 
 /* ---------------- Masthead ---------------- */
@@ -158,7 +158,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   position: relative;
   text-align:center;
   padding: 1.6rem 0 1.1rem 0;
-  border-bottom: 3px double var(--neon);
+  border-bottom: 3px double var(--accent);
   margin-bottom: 1.8rem;
   animation: fadeDown .7s ease both;
   overflow: hidden;
@@ -168,7 +168,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   position:absolute;
   top:0; bottom:0; left:-40%;
   width: 40%;
-  background: linear-gradient(90deg, transparent, rgba(53,242,160,0.16), transparent);
+  background: linear-gradient(90deg, transparent, rgba(232,163,61,0.16), transparent);
   animation: shimmerSweep 6s ease-in-out infinite;
 }
 @keyframes shimmerSweep{
@@ -180,7 +180,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   font-family: 'Zilla Slab', serif;
   font-weight: 700;
   font-size: 3.1rem;
-  color: #EAFBF3;
+  color: #F2E9D8;
   letter-spacing: .01em;
   margin: 0;
   animation: glowPulse 5s ease-in-out infinite;
@@ -200,7 +200,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   content:'▍';
   display:inline-block;
   margin-left:.15rem;
-  color: var(--neon);
+  color: var(--accent);
   animation: blink 1.1s steps(1) infinite;
 }
 .masthead .meta{
@@ -208,7 +208,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   font-size: .7rem;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--neon);
+  color: var(--accent);
   margin-top: .7rem;
 }
 @keyframes fadeDown{
@@ -228,7 +228,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   color:#D8DBE3;
   background: var(--panel);
   border: 1px solid var(--panel-line);
-  border-left: 3px solid var(--neon);
+  border-left: 3px solid var(--accent);
   border-radius: 4px;
   padding: .9rem 1.1rem;
   margin-bottom: .5rem;
@@ -237,7 +237,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 .desk-log .cursor::after{
   content:'▍';
   animation: blink 1s steps(1) infinite;
-  color: var(--neon);
+  color: var(--accent);
 }
 @keyframes blink{ 50%{ opacity:0; } }
 @keyframes fadeIn{ from{opacity:0; transform: translateY(6px);} to{opacity:1; transform:translateY(0);} }
@@ -379,14 +379,14 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   letter-spacing:.08em;
   text-transform:uppercase;
   background: transparent;
-  color: var(--neon);
-  border: 1px solid var(--neon);
+  color: var(--accent);
+  border: 1px solid var(--accent);
   border-radius: 4px;
   padding: .4rem .8rem;
   cursor:pointer;
   transition: all .2s ease;
 }
-.copy-btn:hover{ background: var(--neon); color:#04140D; transform: translateY(-1px); }
+.copy-btn:hover{ background: var(--accent); color:#1C1204; transform: translateY(-1px); }
 
 /* Empty state — the homepage moment */
 .empty-desk{
@@ -402,13 +402,13 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 .empty-desk::before{
   content:'';
   position:absolute; inset:0;
-  background: radial-gradient(420px 220px at 50% 0%, rgba(53,242,160,0.08), transparent 70%);
+  background: radial-gradient(420px 220px at 50% 0%, rgba(232,163,61,0.08), transparent 70%);
   animation: floatMotes 9s ease-in-out infinite;
   pointer-events:none;
 }
 @keyframes borderGlow{
-  0%,100%{ border-color: var(--panel-line); box-shadow: 0 0 0 rgba(53,242,160,0); }
-  50%{ border-color: rgba(53,242,160,0.55); box-shadow: 0 0 30px rgba(53,242,160,0.08) inset; }
+  0%,100%{ border-color: var(--panel-line); box-shadow: 0 0 0 rgba(232,163,61,0); }
+  50%{ border-color: rgba(232,163,61,0.55); box-shadow: 0 0 30px rgba(232,163,61,0.08) inset; }
 }
 .empty-desk .glyph{
   font-size:3rem;
@@ -442,7 +442,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   font-size:.68rem;
   letter-spacing:.14em;
   text-transform:uppercase;
-  color: var(--neon);
+  color: var(--accent);
   opacity:.85;
   position: relative;
   z-index:1;
@@ -459,7 +459,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   content:'';
   position:absolute; inset:-3px;
   border-radius: 5px;
-  border: 1px solid rgba(53,242,160,0.5);
+  border: 1px solid rgba(232,163,61,0.5);
   opacity:0;
   animation: ctaPulse 2.6s ease-out infinite;
   pointer-events:none;
