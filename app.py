@@ -41,20 +41,21 @@ st.markdown("""
 
 <style>
 :root{
-  --ink:        #12100D;
-  --panel:      #1B1712;
-  --panel-line: #332A1C;
-  --paper:      #F6F1E4;
-  --paper-edge: #E7DEC8;
-  --ink-text:   #221F1A;
-  --accent:     #E8A33D;
-  --accent-d:   #8C5A16;
-  --approve:    #5FB58A;
-  --approve-d:  #1F4A38;
+  --ink:        #050806;
+  --panel:      #0D1712;
+  --panel-line: #1F4531;
+  --paper:      #EFF3EA;
+  --paper-edge: #D9E3D2;
+  --ink-text:   #14231A;
+  --accent:     #3FBE75;
+  --accent-d:   #145A34;
+  --accent-black: #000000;
+  --approve:    #3FBE75;
+  --approve-d:  #123319;
   --reject:     #D9524A;
-  --reject-d:   #4A1512;
-  --muted:      #A69B87;
-  --paper2:     #efe7d4;
+  --reject-d:   #2A0D0B;
+  --muted:      #7E9284;
+  --paper2:     #E4EDDF;
 }
 
 html, body, [class*="css"]{
@@ -63,9 +64,9 @@ html, body, [class*="css"]{
 
 .stApp{
   background:
-    radial-gradient(1100px 500px at 12% -10%, #2B2013 0%, transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, #241B10 0%, transparent 55%),
-    radial-gradient(800px 460px at 50% 105%, rgba(232,163,61,0.10) 0%, transparent 65%),
+    radial-gradient(1100px 500px at 12% -10%, #0F2418 0%, transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, #0A1B12 0%, transparent 55%),
+    radial-gradient(800px 460px at 50% 105%, rgba(63,190,117,0.10) 0%, transparent 65%),
     var(--ink);
   background-size: 180% 180%, 180% 180%, 180% 180%, 100% 100%;
   animation: driftBg 26s ease-in-out infinite;
@@ -84,11 +85,11 @@ html, body, [class*="css"]{
   pointer-events: none;
   z-index: 0;
   background-image:
-    radial-gradient(2px 2px at 20% 30%, rgba(232,163,61,0.55) 0, transparent 60%),
-    radial-gradient(2px 2px at 75% 15%, rgba(232,163,61,0.4) 0, transparent 60%),
-    radial-gradient(1.5px 1.5px at 60% 70%, rgba(245,199,122,0.35) 0, transparent 60%),
-    radial-gradient(1.5px 1.5px at 90% 60%, rgba(245,199,122,0.3) 0, transparent 60%),
-    radial-gradient(2px 2px at 35% 85%, rgba(232,163,61,0.35) 0, transparent 60%);
+    radial-gradient(2px 2px at 20% 30%, rgba(63,190,117,0.55) 0, transparent 60%),
+    radial-gradient(2px 2px at 75% 15%, rgba(63,190,117,0.4) 0, transparent 60%),
+    radial-gradient(1.5px 1.5px at 60% 70%, rgba(120,220,160,0.35) 0, transparent 60%),
+    radial-gradient(1.5px 1.5px at 90% 60%, rgba(120,220,160,0.3) 0, transparent 60%),
+    radial-gradient(2px 2px at 35% 85%, rgba(63,190,117,0.35) 0, transparent 60%);
   background-repeat: no-repeat;
   animation: floatMotes 18s ease-in-out infinite;
 }
@@ -99,7 +100,7 @@ html, body, [class*="css"]{
 
 /* ---------------- Sidebar: the desk drawer ---------------- */
 section[data-testid="stSidebar"]{
-  background: linear-gradient(180deg, #17130E 0%, #0E0B07 100%);
+  background: linear-gradient(180deg, #0C1712 0%, #030503 100%);
   border-right: 1px solid var(--panel-line);
 }
 section[data-testid="stSidebar"] * { color: #D8DBE3; }
@@ -116,41 +117,46 @@ section[data-testid="stSidebar"] label{
 }
 section[data-testid="stSidebar"] .stTextInput input,
 section[data-testid="stSidebar"] .stTextArea textarea{
-  background: #100C08;
+  background: #060A07;
   border: 1px solid var(--panel-line);
-  color: #EFE9DA;
+  color: #E4EEE7;
   font-family: 'Source Serif 4', serif;
   transition: border-color .25s ease, box-shadow .25s ease;
 }
 section[data-testid="stSidebar"] .stTextInput input:focus,
 section[data-testid="stSidebar"] .stTextArea textarea:focus{
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(232,163,61,0.15);
+  box-shadow: 0 0 0 3px rgba(63,190,117,0.18);
 }
 
 /* ---------------- Buttons everywhere ---------------- */
-.stButton > button{
+.stButton > button, .stDownloadButton > button{
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.8rem;
   letter-spacing: .08em;
   text-transform: uppercase;
   background: var(--accent);
-  color: #1C1204;
-  border: none;
+  color: #041007;
+  border: 1px solid var(--accent);
   border-radius: 3px;
   padding: 0.6rem 1.1rem;
   font-weight: 600;
-  transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease;
-  box-shadow: 0 2px 0 #8C5A16, 0 6px 14px rgba(0,0,0,.45);
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease, color .25s ease;
+  box-shadow: 0 2px 0 var(--accent-d), 0 6px 14px rgba(0,0,0,.45);
 }
-.stButton > button:hover{
+.stButton > button:hover, .stDownloadButton > button:hover{
   transform: translateY(-2px) scale(1.015);
-  background: #F5C77A;
-  box-shadow: 0 4px 0 #8C5A16, 0 12px 22px rgba(0,0,0,.55);
+  background: #000000;
+  color: var(--accent);
+  box-shadow: 0 4px 0 var(--accent-d), 0 0 18px rgba(63,190,117,.35), 0 12px 22px rgba(0,0,0,.6);
 }
-.stButton > button:active{
+.stButton > button:active, .stDownloadButton > button:active{
   transform: translateY(1px) scale(.99);
-  box-shadow: 0 1px 0 #8C5A16;
+  box-shadow: 0 1px 0 var(--accent-d);
+}
+.stButton > button:focus-visible, .stDownloadButton > button:focus-visible{
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* ---------------- Masthead ---------------- */
@@ -168,7 +174,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   position:absolute;
   top:0; bottom:0; left:-40%;
   width: 40%;
-  background: linear-gradient(90deg, transparent, rgba(232,163,61,0.16), transparent);
+  background: linear-gradient(90deg, transparent, rgba(63,190,117,0.18), transparent);
   animation: shimmerSweep 6s ease-in-out infinite;
 }
 @keyframes shimmerSweep{
@@ -180,14 +186,14 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   font-family: 'Zilla Slab', serif;
   font-weight: 700;
   font-size: 3.1rem;
-  color: #F2E9D8;
+  color: #E8F5EC;
   letter-spacing: .01em;
   margin: 0;
   animation: glowPulse 5s ease-in-out infinite;
 }
 @keyframes glowPulse{
-  0%,100%{ text-shadow: 0 0 0 rgba(243,236,218,0); }
-  50%{ text-shadow: 0 0 18px rgba(243,236,218,0.28); }
+  0%,100%{ text-shadow: 0 0 0 rgba(63,190,117,0); }
+  50%{ text-shadow: 0 0 18px rgba(63,190,117,0.32); }
 }
 .masthead .tagline{
   font-family: 'Source Serif 4', serif;
@@ -255,7 +261,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   background: var(--panel);
   transition: all .2s ease;
 }
-.chip.approved{ border-color: var(--approve); color:#BFF0D6; background: rgba(62,139,99,.12); }
+.chip.approved{ border-color: var(--approve); color:#BFF0D6; background: rgba(63,190,117,.14); }
 .chip.rejected{ border-color: var(--reject); color:#F3C7C2; background: rgba(193,68,58,.12); }
 
 /* ---------------- Manuscript card ---------------- */
@@ -288,7 +294,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 }
 .manuscript:hover{
   transform: rotate(0deg) translateY(-6px) scale(1.008);
-  box-shadow: 0 1px 0 var(--paper-edge), 0 28px 46px rgba(0,0,0,.55), 0 4px 10px rgba(0,0,0,.3);
+  box-shadow: 0 1px 0 var(--paper-edge), 0 0 0 2px var(--accent), 0 28px 46px rgba(0,0,0,.55), 0 4px 10px rgba(0,0,0,.3);
 }
 .manuscript .label{
   font-family:'IBM Plex Mono', monospace;
@@ -342,19 +348,19 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 /* Red-pen margin note */
 .redpen{
   font-family: 'Caveat', cursive;
-  color: #9c2b22;
+  color: #1F5A34;
   font-size: 1.28rem;
   line-height: 1.35;
   margin-top: 1rem;
   padding-top: .8rem;
-  border-top: 1px dashed #c98f88;
+  border-top: 1px dashed #9BB8A6;
   transform: rotate(-0.4deg);
 }
 .redpen .tag{
   font-family:'IBM Plex Mono', monospace;
   font-size:.66rem;
   letter-spacing:.1em;
-  color:#9c2b22;
+  color:#1F5A34;
   text-transform:uppercase;
   display:block;
   margin-bottom:.25rem;
@@ -362,7 +368,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 
 /* Final approved banner */
 .final-banner{
-  background: linear-gradient(135deg, var(--approve-d), #123326);
+  background: linear-gradient(135deg, var(--approve-d), var(--ink));
   border: 1px solid var(--approve);
   border-radius: 6px;
   padding: 1.1rem 1.4rem;
@@ -386,7 +392,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   cursor:pointer;
   transition: all .2s ease;
 }
-.copy-btn:hover{ background: var(--accent); color:#1C1204; transform: translateY(-1px); }
+.copy-btn:hover{ background: #000000; color: var(--accent); box-shadow: 0 0 12px rgba(63,190,117,.4); transform: translateY(-1px); }
 
 /* Empty state — the homepage moment */
 .empty-desk{
@@ -402,13 +408,13 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 .empty-desk::before{
   content:'';
   position:absolute; inset:0;
-  background: radial-gradient(420px 220px at 50% 0%, rgba(232,163,61,0.08), transparent 70%);
+  background: radial-gradient(420px 220px at 50% 0%, rgba(63,190,117,0.10), transparent 70%);
   animation: floatMotes 9s ease-in-out infinite;
   pointer-events:none;
 }
 @keyframes borderGlow{
-  0%,100%{ border-color: var(--panel-line); box-shadow: 0 0 0 rgba(232,163,61,0); }
-  50%{ border-color: rgba(232,163,61,0.55); box-shadow: 0 0 30px rgba(232,163,61,0.08) inset; }
+  0%,100%{ border-color: var(--panel-line); box-shadow: 0 0 0 rgba(63,190,117,0); }
+  50%{ border-color: rgba(63,190,117,0.55); box-shadow: 0 0 30px rgba(63,190,117,0.10) inset; }
 }
 .empty-desk .glyph{
   font-size:3rem;
@@ -459,7 +465,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   content:'';
   position:absolute; inset:-3px;
   border-radius: 5px;
-  border: 1px solid rgba(232,163,61,0.5);
+  border: 1px solid rgba(63,190,117,0.5);
   opacity:0;
   animation: ctaPulse 2.6s ease-out infinite;
   pointer-events:none;
@@ -468,6 +474,36 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   0%{ opacity:.55; transform: scale(1); }
   100%{ opacity:0; transform: scale(1.12); }
 }
+
+/* Themed scrollbar so the dark UI stays consistent even in overflow areas */
+::-webkit-scrollbar{ width: 10px; height: 10px; }
+::-webkit-scrollbar-track{ background: var(--ink); }
+::-webkit-scrollbar-thumb{ background: var(--panel-line); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover{ background: var(--accent-d); }
+
+/* Word-count badge on each manuscript */
+.wordcount{
+  position:absolute;
+  bottom: .9rem; right: 1.1rem;
+  font-family:'IBM Plex Mono', monospace;
+  font-size:.66rem;
+  letter-spacing:.08em;
+  color:#6E8577;
+  text-transform:uppercase;
+}
+
+/* Sidebar round-tracker */
+.round-tracker{
+  display:flex; gap:.35rem; margin: .6rem 0 .2rem 0;
+}
+.round-dot{
+  flex:1;
+  height:5px;
+  border-radius:3px;
+  background: var(--panel-line);
+  transition: background .3s ease;
+}
+.round-dot.filled{ background: var(--accent); }
 
 /* Key warning */
 .key-warning{
@@ -624,9 +660,16 @@ with st.sidebar:
     )
     max_attempts = st.slider("Max revision rounds", min_value=1, max_value=5, value=3)
 
+    _done = len(st.session_state.get("records", []))
+    _dots = "".join(
+        f"<div class='round-dot{' filled' if i < _done else ''}'></div>"
+        for i in range(max_attempts)
+    )
+    st.markdown(f"<div class='round-tracker'>{_dots}</div>", unsafe_allow_html=True)
+
     st.markdown("---")
     st.markdown(
-        "<span style='font-family:IBM Plex Mono; font-size:.7rem; letter-spacing:.1em; color:#7C8394;'>"
+        "<span style='font-family:IBM Plex Mono; font-size:.7rem; letter-spacing:.1em; color:#7E9284;'>"
         "WRITER · mistral-small &nbsp;|&nbsp; EDITOR · gemini-2.5-flash</span>",
         unsafe_allow_html=True,
     )
@@ -748,7 +791,7 @@ else:
         """, unsafe_allow_html=True)
     elif records:
         st.markdown("""
-        <div class="final-banner" style="background:linear-gradient(135deg,#5C221D,#33130F); border-color:var(--reject);">
+        <div class="final-banner" style="background:linear-gradient(135deg,#2A0D0B,#000000); border-color:var(--reject);">
           <div class="icon">⏳</div>
           <div class="txt" style="color:#F3D6D2;">MAX ROUNDS REACHED — editor still has notes. Best draft is below.</div>
         </div>
@@ -764,6 +807,8 @@ else:
         if not r["approved"]:
             redpen = f"""<div class="redpen"><span class="tag">Editor's note</span>{r['feedback']}</div>"""
 
+        word_count = len(r["draft"].split())
+
         st.markdown(f"""
         <div class="manuscript-wrap" style="--tilt:{tilt}deg;">
           <div class="manuscript" style="--tilt:{tilt}deg;">
@@ -772,6 +817,7 @@ else:
             <h3>{topic.strip() or 'Untitled draft'}</h3>
             <div class="body-text">{r['draft']}</div>
             {redpen}
+            <div class="wordcount">{word_count} words</div>
           </div>
         </div>
         """, unsafe_allow_html=True)
@@ -780,3 +826,9 @@ else:
     # reliable copy icon, so we don't hand-roll JS/HTML escaping.
     st.markdown("<div class='label' style='margin-bottom:.3rem;'>Latest draft — click the copy icon on hover</div>", unsafe_allow_html=True)
     st.code(records[-1]["draft"], language=None)
+    st.download_button(
+        "Download draft (.txt)",
+        data=records[-1]["draft"],
+        file_name=f"{(topic.strip() or 'draft').replace(' ', '_')[:40]}.txt",
+        mime="text/plain",
+    )
