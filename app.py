@@ -214,8 +214,12 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   font-size: .7rem;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: var(--accent);
+  color: var(--muted);
   margin-top: .7rem;
+}
+.masthead .meta b{
+  color: var(--accent);
+  font-weight: 600;
 }
 @keyframes fadeDown{
   from{ opacity:0; transform: translateY(-14px); }
@@ -569,10 +573,10 @@ def build_graph():
     search_tool = TavilySearch(max_results=3)
     tools = [search_tool]
 
-    writer_llm = ChatMistralAI(model="mistral-small-2506", temperature=0.7)
+    writer_llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7)
     writer_llm_with_tools = writer_llm.bind_tools(tools)
 
-    reviewer_llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.2)
+    reviewer_llm = ChatMistralAI(model="mistral-small-2506", temperature=0.2)
 
     def writer_node(state: State) -> dict:
         attempt = state.get("attempt", 0) + 1
@@ -670,7 +674,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown(
         "<span style='font-family:IBM Plex Mono; font-size:.7rem; letter-spacing:.1em; color:#7E9284;'>"
-        "WRITER · mistral-small &nbsp;|&nbsp; EDITOR · gemini-2.5-flash</span>",
+        "WRITER · gemini-2.5-flash &nbsp;|&nbsp; EDITOR · mistral-small</span>",
         unsafe_allow_html=True,
     )
 
@@ -690,7 +694,7 @@ st.markdown("""
 <div class="masthead">
   <h1>THE BYLINE DESK</h1>
   <div class="tagline">"publish nothing the editor hasn't signed off on"</div>
-  <div class="meta">Vol. I · Drafted by Mistral · Reviewed by Gemini · Sourced via Tavily</div>
+  <div class="meta">Vol. I · Drafted by <b>Gemini</b> · Reviewed by <b>Mistral</b> · Sourced via Tavily</div>
 </div>
 """, unsafe_allow_html=True)
 
