@@ -13,7 +13,7 @@ The Byline Desk is a LangGraph-powered pipeline that turns a single topic into a
 ```
         ┌────────────┐        needs current info?        ┌────────────┐
  START ─▶   Writer    │───────────────────────────────────▶  Tavily    │
-        │ (Mistral)  │◀───────────────────────────────────│  Search    │
+        │  (Gemini)  │◀───────────────────────────────────│  Search    │
         └────────────┘                                     └────────────┘
               │
               ▼
@@ -25,7 +25,7 @@ The Byline Desk is a LangGraph-powered pipeline that turns a single topic into a
               ▼
         ┌────────────┐   rejected & attempts left   ┌────────────┐
         │  Reviewer   │──────────────────────────────▶  back to   │
-        │  (Gemini)   │                               │  Writer    │
+        │  (Mistral)  │                               │  Writer    │
         └────────────┘                               └────────────┘
               │
    approved OR max attempts reached
@@ -34,8 +34,8 @@ The Byline Desk is a LangGraph-powered pipeline that turns a single topic into a
              END
 ```
 
-- **Writer** — `mistral-small-2506` via `ChatMistralAI`. Drafts the post, and can call a Tavily web search tool first if the topic needs current facts or stats. On a retry, it's fed the editor's exact feedback and told to fix every point raised.
-- **Reviewer** — `gemini-2.5-flash` via `ChatGoogleGenerativeAI`. Scores the draft against a fixed rubric (hook, one takeaway, skimmability, ~150–200 words, CTA/question ending, tone, no hashtags) and returns a strict `VERDICT` + `FEEDBACK`.
+- **Writer** — `gemini-2.5-flash` via `ChatGoogleGenerativeAI`. Drafts the post, and can call a Tavily web search tool first if the topic needs current facts or stats. On a retry, it's fed the editor's exact feedback and told to fix every point raised.
+- **Reviewer** — `mistral-small-2506` via `ChatMistralAI`. Scores the draft against a fixed rubric (hook, one takeaway, skimmability, ~150–200 words, CTA/question ending, tone, no hashtags) and returns a strict `VERDICT` + `FEEDBACK`.
 - **Loop control** — the graph keeps cycling writer → reviewer until the reviewer approves or the configurable revision cap is reached, whichever comes first.
 
 The whole thing is a compiled [LangGraph](https://langchain-ai.github.io/langgraph/) `StateGraph`, wrapped in a Streamlit front end that streams each step live and renders every revision as a "manuscript" card with an editor's stamp.
@@ -59,8 +59,8 @@ The whole thing is a compiled [LangGraph](https://langchain-ai.github.io/langgra
 | Layer | Tool |
 |---|---|
 | Orchestration | [LangGraph](https://github.com/langchain-ai/langgraph) |
-| Writer LLM | Mistral (`mistral-small-2506`) via `langchain-mistralai` |
-| Reviewer LLM | Google Gemini (`gemini-2.5-flash`) via `langchain-google-genai` |
+| Writer LLM | Google Gemini (`gemini-2.5-flash`) via `langchain-google-genai` |
+| Reviewer LLM | Mistral (`mistral-small-2506`) via `langchain-mistralai` |
 | Web search tool | [Tavily](https://tavily.com/) via `langchain-tavily` |
 | UI | [Streamlit](https://streamlit.io/) |
 | Deployment | Streamlit Community Cloud |
