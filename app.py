@@ -493,9 +493,23 @@ def build_graph():
 
     # Reviewer: same provider (Mistral), larger model + low temperature
     # for a stricter, more consistent editorial judgment
-    reviewer_llm = ChatMistralAI(model="mistral-large-latest", temperature=0.2)
+    reviewer_llm = ChatMistralAI(model="mistral-small-2506", temperature=0.2)
 
     def writer_node(state: State) -> dict:
+        existing_messages = state.get("messages", [])
+        last_message = existing_messages[-1] if existing_messages else None
+
+        # If we're coming straight back from a tool call, the model still
+        # owes us its actual draft (it only issued a search so far) — so
+        # resume the SAME conversation, including the tool results, instead
+        # of starting a brand-new message. This is what lets a search-backed
+        # draft actually get produced instead of leaving `draft` empty.
+        if last_message is not None and getattr(last_message, "type", None) == "tool":
+            response = writer_llm_with_tools.invoke(
+                [("system", WRITER_SYSTEM_PROMPT)] + list(existing_messages)
+            )
+            return {"messages": [response]}
+
         attempt = state.get("attempt", 0) + 1
         topic = state["topic"]
         previous_feedback = state["review_feedback"]
@@ -559,7 +573,7 @@ def build_graph():
 
     graph.add_edge(START, "writer")
     graph.add_conditional_edges("writer", should_use_tool)
-    graph.add_edge("tools", "reviewer")
+    graph.add_edge("tools", "writer")
     graph.add_edge("extract_draft", "reviewer")
     graph.add_conditional_edges("reviewer", should_stop_looping)
 
