@@ -7,7 +7,6 @@ from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 from langchain_mistralai import ChatMistralAI
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_tavily import TavilySearch
 
 # ======================================================================
@@ -22,18 +21,19 @@ st.set_page_config(
 
 # ======================================================================
 # SECRETS -> ENV  (works locally via .env, and on Streamlit Cloud via
-# the Secrets panel — just add MISTRAL_API_KEY, GOOGLE_API_KEY and
-# TAVILY_API_KEY there and this picks them up automatically)
+# the Secrets panel — just add MISTRAL_API_KEY and TAVILY_API_KEY there
+# and this picks them up automatically)
 # ======================================================================
-for _key in ("MISTRAL_API_KEY", "GOOGLE_API_KEY", "TAVILY_API_KEY"):
+for _key in ("MISTRAL_API_KEY", "TAVILY_API_KEY"):
     if _key in st.secrets:
         os.environ[_key] = st.secrets[_key]
 
-MISSING_KEYS = [k for k in ("MISTRAL_API_KEY", "GOOGLE_API_KEY", "TAVILY_API_KEY") if not os.environ.get(k)]
+MISSING_KEYS = [k for k in ("MISTRAL_API_KEY", "TAVILY_API_KEY") if not os.environ.get(k)]
 
 # ======================================================================
 # STYLE — "The Byline Desk": a newsroom copy-desk where an AI writer
 # drafts and a stricter AI editor won't sign off until it's right.
+# Fully responsive: phone (<576px), tablet (576-1024px), laptop (>1024px)
 # ======================================================================
 st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,21 +41,19 @@ st.markdown("""
 
 <style>
 :root{
-  --ink:        #050806;
-  --panel:      #0D1712;
-  --panel-line: #1F4531;
-  --paper:      #EFF3EA;
-  --paper-edge: #D9E3D2;
-  --ink-text:   #14231A;
-  --accent:     #3FBE75;
-  --accent-d:   #145A34;
-  --accent-black: #000000;
-  --approve:    #3FBE75;
-  --approve-d:  #123319;
-  --reject:     #D9524A;
-  --reject-d:   #2A0D0B;
-  --muted:      #7E9284;
-  --paper2:     #E4EDDF;
+  --ink:        #12151C;
+  --panel:      #181C26;
+  --panel-line: #2A2F3C;
+  --paper:      #F6F1E4;
+  --paper-edge: #E7DEC8;
+  --ink-text:   #221F1A;
+  --gold:       #C9A227;
+  --approve:    #3E8B63;
+  --approve-d:  #234A36;
+  --reject:     #C1443A;
+  --reject-d:   #5C221D;
+  --muted:      #9AA1AE;
+  --paper2:     #efe7d4;
 }
 
 html, body, [class*="css"]{
@@ -64,43 +62,27 @@ html, body, [class*="css"]{
 
 .stApp{
   background:
-    radial-gradient(1100px 500px at 12% -10%, #0F2418 0%, transparent 60%),
-    radial-gradient(900px 500px at 100% 0%, #0A1B12 0%, transparent 55%),
-    radial-gradient(800px 460px at 50% 105%, rgba(63,190,117,0.10) 0%, transparent 65%),
+    radial-gradient(1100px 500px at 12% -10%, #1B2130 0%, transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, #1A2A24 0%, transparent 55%),
     var(--ink);
-  background-size: 180% 180%, 180% 180%, 180% 180%, 100% 100%;
-  animation: driftBg 26s ease-in-out infinite;
-}
-@keyframes driftBg{
-  0%{   background-position: 12% -10%, 100% 0%, 50% 105%, 0 0; }
-  50%{  background-position: 22% 6%,   88% 12%, 46% 92%,  0 0; }
-  100%{ background-position: 12% -10%, 100% 0%, 50% 105%, 0 0; }
 }
 
-/* drifting ink motes across the whole page — pure ambience */
-.stApp::before{
-  content:'';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image:
-    radial-gradient(2px 2px at 20% 30%, rgba(63,190,117,0.55) 0, transparent 60%),
-    radial-gradient(2px 2px at 75% 15%, rgba(63,190,117,0.4) 0, transparent 60%),
-    radial-gradient(1.5px 1.5px at 60% 70%, rgba(120,220,160,0.35) 0, transparent 60%),
-    radial-gradient(1.5px 1.5px at 90% 60%, rgba(120,220,160,0.3) 0, transparent 60%),
-    radial-gradient(2px 2px at 35% 85%, rgba(63,190,117,0.35) 0, transparent 60%);
-  background-repeat: no-repeat;
-  animation: floatMotes 18s ease-in-out infinite;
+/* ---------------- Make Streamlit's own layout fluid ---------------- */
+.block-container{
+  padding-left: 3rem;
+  padding-right: 3rem;
+  padding-top: 2rem;
+  max-width: 1100px;
+  transition: padding .2s ease;
 }
-@keyframes floatMotes{
-  0%,100%{ transform: translateY(0px); }
-  50%{ transform: translateY(-22px); }
+img, .manuscript, .desk-log, .final-banner, .empty-desk{
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* ---------------- Sidebar: the desk drawer ---------------- */
 section[data-testid="stSidebar"]{
-  background: linear-gradient(180deg, #0C1712 0%, #030503 100%);
+  background: linear-gradient(180deg, #14171F 0%, #10131A 100%);
   border-right: 1px solid var(--panel-line);
 }
 section[data-testid="stSidebar"] * { color: #D8DBE3; }
@@ -117,137 +99,102 @@ section[data-testid="stSidebar"] label{
 }
 section[data-testid="stSidebar"] .stTextInput input,
 section[data-testid="stSidebar"] .stTextArea textarea{
-  background: #060A07;
+  background: #0F1218;
   border: 1px solid var(--panel-line);
-  color: #E4EEE7;
+  color: #EFE9DA;
   font-family: 'Source Serif 4', serif;
   transition: border-color .25s ease, box-shadow .25s ease;
 }
 section[data-testid="stSidebar"] .stTextInput input:focus,
 section[data-testid="stSidebar"] .stTextArea textarea:focus{
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(63,190,117,0.18);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,162,39,0.15);
 }
 
 /* ---------------- Buttons everywhere ---------------- */
-.stButton > button, .stDownloadButton > button{
+.stButton > button{
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.8rem;
   letter-spacing: .08em;
   text-transform: uppercase;
-  background: var(--accent);
-  color: #041007;
-  border: 1px solid var(--accent);
+  background: var(--gold);
+  color: #171208;
+  border: none;
   border-radius: 3px;
   padding: 0.6rem 1.1rem;
   font-weight: 600;
-  transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease, color .25s ease;
-  box-shadow: 0 2px 0 var(--accent-d), 0 6px 14px rgba(0,0,0,.45);
+  transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease;
+  box-shadow: 0 2px 0 #8a6d16, 0 6px 14px rgba(0,0,0,.35);
+  width: 100%;
 }
-.stButton > button:hover, .stDownloadButton > button:hover{
+.stButton > button:hover{
   transform: translateY(-2px) scale(1.015);
-  background: #000000;
-  color: var(--accent);
-  box-shadow: 0 4px 0 var(--accent-d), 0 0 18px rgba(63,190,117,.35), 0 12px 22px rgba(0,0,0,.6);
+  background: #DDB338;
+  box-shadow: 0 4px 0 #8a6d16, 0 12px 22px rgba(0,0,0,.45);
 }
-.stButton > button:active, .stDownloadButton > button:active{
+.stButton > button:active{
   transform: translateY(1px) scale(.99);
-  box-shadow: 0 1px 0 var(--accent-d);
-}
-.stButton > button:focus-visible, .stDownloadButton > button:focus-visible{
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  box-shadow: 0 1px 0 #8a6d16;
 }
 
 /* ---------------- Masthead ---------------- */
 .masthead{
-  position: relative;
   text-align:center;
   padding: 1.6rem 0 1.1rem 0;
-  border-bottom: 3px double var(--accent);
+  border-bottom: 3px double var(--gold);
   margin-bottom: 1.8rem;
   animation: fadeDown .7s ease both;
-  overflow: hidden;
-}
-.masthead::after{
-  content:'';
-  position:absolute;
-  top:0; bottom:0; left:-40%;
-  width: 40%;
-  background: linear-gradient(90deg, transparent, rgba(63,190,117,0.18), transparent);
-  animation: shimmerSweep 6s ease-in-out infinite;
-}
-@keyframes shimmerSweep{
-  0%{ left:-40%; }
-  55%{ left:110%; }
-  100%{ left:110%; }
 }
 .masthead h1{
   font-family: 'Zilla Slab', serif;
   font-weight: 700;
-  font-size: 3.1rem;
-  color: #E8F5EC;
+  font-size: clamp(1.7rem, 5vw, 3.1rem);
+  color: #F3ECDA;
   letter-spacing: .01em;
   margin: 0;
-  animation: glowPulse 5s ease-in-out infinite;
-}
-@keyframes glowPulse{
-  0%,100%{ text-shadow: 0 0 0 rgba(63,190,117,0); }
-  50%{ text-shadow: 0 0 18px rgba(63,190,117,0.32); }
+  line-height: 1.15;
 }
 .masthead .tagline{
   font-family: 'Source Serif 4', serif;
   font-style: italic;
   color: var(--muted);
-  font-size: 1.02rem;
+  font-size: clamp(.82rem, 2.4vw, 1.02rem);
   margin-top: .3rem;
-}
-.masthead .tagline::after{
-  content:'▍';
-  display:inline-block;
-  margin-left:.15rem;
-  color: var(--accent);
-  animation: blink 1.1s steps(1) infinite;
+  padding: 0 .5rem;
 }
 .masthead .meta{
   font-family: 'IBM Plex Mono', monospace;
-  font-size: .7rem;
-  letter-spacing: .16em;
+  font-size: clamp(.58rem, 1.6vw, .7rem);
+  letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--gold);
   margin-top: .7rem;
-}
-.masthead .meta b{
-  color: var(--accent);
-  font-weight: 600;
+  padding: 0 .5rem;
+  word-break: break-word;
 }
 @keyframes fadeDown{
   from{ opacity:0; transform: translateY(-14px); }
   to{ opacity:1; transform: translateY(0); }
 }
 
-@media (prefers-reduced-motion: reduce){
-  .stApp, .stApp::before, .masthead::after, .masthead h1, .masthead .tagline::after,
-  .empty-desk .glyph, .empty-desk, .stButton > button{ animation: none !important; }
-}
-
 /* ---------------- Status ticker while the graph runs ---------------- */
 .desk-log{
   font-family:'IBM Plex Mono', monospace;
-  font-size: .84rem;
+  font-size: clamp(.74rem, 2vw, .84rem);
   color:#D8DBE3;
   background: var(--panel);
   border: 1px solid var(--panel-line);
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--gold);
   border-radius: 4px;
   padding: .9rem 1.1rem;
   margin-bottom: .5rem;
   animation: fadeIn .35s ease both;
+  word-wrap: break-word;
 }
 .desk-log .cursor::after{
   content:'▍';
   animation: blink 1s steps(1) infinite;
-  color: var(--accent);
+  color: var(--gold);
 }
 @keyframes blink{ 50%{ opacity:0; } }
 @keyframes fadeIn{ from{opacity:0; transform: translateY(6px);} to{opacity:1; transform:translateY(0);} }
@@ -256,7 +203,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 .chip-row{ display:flex; gap:.5rem; margin: 0 0 1.1rem 0; flex-wrap:wrap; }
 .chip{
   font-family:'IBM Plex Mono', monospace;
-  font-size:.72rem;
+  font-size: clamp(.66rem, 1.8vw, .72rem);
   letter-spacing:.08em;
   padding:.32rem .7rem;
   border-radius: 999px;
@@ -264,8 +211,9 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   color: var(--muted);
   background: var(--panel);
   transition: all .2s ease;
+  white-space: nowrap;
 }
-.chip.approved{ border-color: var(--approve); color:#BFF0D6; background: rgba(63,190,117,.14); }
+.chip.approved{ border-color: var(--approve); color:#BFF0D6; background: rgba(62,139,99,.12); }
 .chip.rejected{ border-color: var(--reject); color:#F3C7C2; background: rgba(193,68,58,.12); }
 
 /* ---------------- Manuscript card ---------------- */
@@ -273,6 +221,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   position: relative;
   margin-bottom: 2.6rem;
   animation: riseIn .5s cubic-bezier(.2,.8,.2,1) both;
+  width: 100%;
 }
 @keyframes riseIn{
   from{ opacity:0; transform: translateY(18px) rotate(0deg); }
@@ -283,12 +232,13 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   background: linear-gradient(180deg, var(--paper) 0%, var(--paper2) 100%);
   color: var(--ink-text);
   border-radius: 2px;
-  padding: 1.9rem 2.1rem 1.6rem 2.1rem;
+  padding: clamp(1.2rem, 3vw, 1.9rem) clamp(1.1rem, 3.5vw, 2.1rem) clamp(1.1rem, 2.5vw, 1.6rem);
   box-shadow: 0 1px 0 var(--paper-edge), 0 18px 34px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.25);
   transform: rotate(var(--tilt));
   transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease;
   position: relative;
   overflow: hidden;
+  width: 100%;
 }
 .manuscript::before{
   content:'';
@@ -298,7 +248,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 }
 .manuscript:hover{
   transform: rotate(0deg) translateY(-6px) scale(1.008);
-  box-shadow: 0 1px 0 var(--paper-edge), 0 0 0 2px var(--accent), 0 28px 46px rgba(0,0,0,.55), 0 4px 10px rgba(0,0,0,.3);
+  box-shadow: 0 1px 0 var(--paper-edge), 0 28px 46px rgba(0,0,0,.55), 0 4px 10px rgba(0,0,0,.3);
 }
 .manuscript .label{
   font-family:'IBM Plex Mono', monospace;
@@ -310,17 +260,19 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 }
 .manuscript h3{
   font-family:'Zilla Slab', serif;
-  font-size:1.25rem;
+  font-size: clamp(1.05rem, 3vw, 1.25rem);
   margin: 0 0 .8rem 0;
   color: var(--ink-text);
   border-bottom: 1px solid var(--paper-edge);
   padding-bottom:.5rem;
+  word-wrap: break-word;
 }
 .manuscript .body-text{
   font-family:'Source Serif 4', serif;
-  font-size:1.02rem;
+  font-size: clamp(.92rem, 2.4vw, 1.02rem);
   line-height:1.65;
   white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 /* Stamp */
@@ -329,7 +281,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   top: 1.3rem; right: 1.6rem;
   font-family:'IBM Plex Mono', monospace;
   font-weight:700;
-  font-size:1.05rem;
+  font-size: clamp(.82rem, 2.4vw, 1.05rem);
   letter-spacing:.12em;
   padding:.4rem .8rem;
   border: 3px solid currentColor;
@@ -352,19 +304,20 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 /* Red-pen margin note */
 .redpen{
   font-family: 'Caveat', cursive;
-  color: #1F5A34;
-  font-size: 1.28rem;
+  color: #9c2b22;
+  font-size: clamp(1.05rem, 3vw, 1.28rem);
   line-height: 1.35;
   margin-top: 1rem;
   padding-top: .8rem;
-  border-top: 1px dashed #9BB8A6;
+  border-top: 1px dashed #c98f88;
   transform: rotate(-0.4deg);
+  word-wrap: break-word;
 }
 .redpen .tag{
   font-family:'IBM Plex Mono', monospace;
   font-size:.66rem;
   letter-spacing:.1em;
-  color:#1F5A34;
+  color:#9c2b22;
   text-transform:uppercase;
   display:block;
   margin-bottom:.25rem;
@@ -372,16 +325,17 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 
 /* Final approved banner */
 .final-banner{
-  background: linear-gradient(135deg, var(--approve-d), var(--ink));
+  background: linear-gradient(135deg, var(--approve-d), #123326);
   border: 1px solid var(--approve);
   border-radius: 6px;
-  padding: 1.1rem 1.4rem;
+  padding: 1rem 1.2rem;
   margin-bottom: 1.4rem;
   display:flex; align-items:center; gap:.8rem;
   animation: fadeIn .4s ease both;
+  flex-wrap: wrap;
 }
-.final-banner .icon{ font-size:1.6rem; }
-.final-banner .txt{ font-family:'IBM Plex Mono', monospace; color:#D9F2E4; font-size:.85rem; letter-spacing:.04em; }
+.final-banner .icon{ font-size: clamp(1.2rem, 3vw, 1.6rem); }
+.final-banner .txt{ font-family:'IBM Plex Mono', monospace; color:#D9F2E4; font-size: clamp(.72rem, 2vw, .85rem); letter-spacing:.04em; }
 
 .copy-btn{
   font-family:'IBM Plex Mono', monospace;
@@ -389,125 +343,28 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   letter-spacing:.08em;
   text-transform:uppercase;
   background: transparent;
-  color: var(--accent);
-  border: 1px solid var(--accent);
+  color: var(--gold);
+  border: 1px solid var(--gold);
   border-radius: 4px;
-  padding: .4rem .8rem;
+  padding: .55rem .8rem;
   cursor:pointer;
   transition: all .2s ease;
+  width: 100%;
+  max-width: 260px;
 }
-.copy-btn:hover{ background: #000000; color: var(--accent); box-shadow: 0 0 12px rgba(63,190,117,.4); transform: translateY(-1px); }
+.copy-btn:hover{ background: var(--gold); color:#171208; transform: translateY(-1px); }
 
-/* Empty state — the homepage moment */
+/* Empty state */
 .empty-desk{
-  position: relative;
   text-align:center;
-  padding: 4.2rem 1rem 3.6rem 1rem;
+  padding: clamp(2rem, 6vw, 3.2rem) 1rem;
   color: var(--muted);
   border: 1px dashed var(--panel-line);
-  border-radius: 10px;
-  animation: fadeIn .6s ease both, borderGlow 4s ease-in-out infinite;
-  overflow: hidden;
+  border-radius: 8px;
+  animation: fadeIn .5s ease both;
 }
-.empty-desk::before{
-  content:'';
-  position:absolute; inset:0;
-  background: radial-gradient(420px 220px at 50% 0%, rgba(63,190,117,0.10), transparent 70%);
-  animation: floatMotes 9s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes borderGlow{
-  0%,100%{ border-color: var(--panel-line); box-shadow: 0 0 0 rgba(63,190,117,0); }
-  50%{ border-color: rgba(63,190,117,0.55); box-shadow: 0 0 30px rgba(63,190,117,0.10) inset; }
-}
-.empty-desk .glyph{
-  font-size:3rem;
-  margin-bottom:.8rem;
-  opacity:.85;
-  display:inline-block;
-  animation: bob 3.2s ease-in-out infinite;
-}
-@keyframes bob{
-  0%,100%{ transform: translateY(0) rotate(-2deg); }
-  50%{ transform: translateY(-12px) rotate(2deg); }
-}
-.empty-desk h4{
-  font-family:'Zilla Slab', serif;
-  color:#D8DBE3;
-  font-size: 1.5rem;
-  margin: 0 0 .4rem 0;
-  letter-spacing:.01em;
-}
-.empty-desk .sub{
-  font-family:'Source Serif 4', serif;
-  font-style: italic;
-  font-size: 1rem;
-  position: relative;
-  z-index:1;
-}
-.empty-desk .hint{
-  display:inline-block;
-  margin-top:1.2rem;
-  font-family:'IBM Plex Mono', monospace;
-  font-size:.68rem;
-  letter-spacing:.14em;
-  text-transform:uppercase;
-  color: var(--accent);
-  opacity:.85;
-  position: relative;
-  z-index:1;
-  animation: hintPulse 2.4s ease-in-out infinite;
-}
-@keyframes hintPulse{
-  0%,100%{ opacity:.5; }
-  50%{ opacity:1; }
-}
-
-/* idle glow ring on the primary CTA so the empty page still feels alive */
-.stButton > button{ position: relative; }
-.stButton > button::after{
-  content:'';
-  position:absolute; inset:-3px;
-  border-radius: 5px;
-  border: 1px solid rgba(63,190,117,0.5);
-  opacity:0;
-  animation: ctaPulse 2.6s ease-out infinite;
-  pointer-events:none;
-}
-@keyframes ctaPulse{
-  0%{ opacity:.55; transform: scale(1); }
-  100%{ opacity:0; transform: scale(1.12); }
-}
-
-/* Themed scrollbar so the dark UI stays consistent even in overflow areas */
-::-webkit-scrollbar{ width: 10px; height: 10px; }
-::-webkit-scrollbar-track{ background: var(--ink); }
-::-webkit-scrollbar-thumb{ background: var(--panel-line); border-radius: 6px; }
-::-webkit-scrollbar-thumb:hover{ background: var(--accent-d); }
-
-/* Word-count badge on each manuscript */
-.wordcount{
-  position:absolute;
-  bottom: .9rem; right: 1.1rem;
-  font-family:'IBM Plex Mono', monospace;
-  font-size:.66rem;
-  letter-spacing:.08em;
-  color:#6E8577;
-  text-transform:uppercase;
-}
-
-/* Sidebar round-tracker */
-.round-tracker{
-  display:flex; gap:.35rem; margin: .6rem 0 .2rem 0;
-}
-.round-dot{
-  flex:1;
-  height:5px;
-  border-radius:3px;
-  background: var(--panel-line);
-  transition: background .3s ease;
-}
-.round-dot.filled{ background: var(--accent); }
+.empty-desk .glyph{ font-size: clamp(1.8rem, 5vw, 2.4rem); margin-bottom:.6rem; opacity:.7; }
+.empty-desk h4{ font-family:'Zilla Slab', serif; color:#D8DBE3; margin: 0 0 .3rem 0; font-size: clamp(1rem, 3vw, 1.2rem); }
 
 /* Key warning */
 .key-warning{
@@ -519,12 +376,69 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   border-radius:4px;
   padding:.7rem 1rem;
   margin-bottom:1rem;
+  word-wrap: break-word;
+}
+
+/* =====================================================================
+   BREAKPOINTS
+   Laptop/desktop  : > 1024px  (defaults above already target this)
+   Tablet (iPad)   : 577px - 1024px
+   Phone (iPhone)  : <= 576px
+   ===================================================================== */
+
+/* ---- Tablets (iPad portrait/landscape, small laptops) ---- */
+@media (max-width: 1024px){
+  .block-container{
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+    padding-top: 1.2rem;
+  }
+  .manuscript{ --tilt: 0deg !important; transform: none !important; }
+  .manuscript:hover{ transform: translateY(-4px) !important; }
+  .stamp{ top: 1rem; right: 1rem; transform: rotate(-8deg) scale(1.6); }
+  @keyframes stampSlam{
+    0%{ opacity:0; transform: rotate(-8deg) scale(1.8); }
+    60%{ opacity:1; transform: rotate(-8deg) scale(.95); }
+    100%{ opacity:1; transform: rotate(-8deg) scale(1); }
+  }
+}
+
+/* ---- Phones (iPhone SE up to Pro Max, portrait & landscape) ---- */
+@media (max-width: 576px){
+  .block-container{
+    padding-left: .9rem;
+    padding-right: .9rem;
+    padding-top: .8rem;
+  }
+  .masthead{ padding: 1.1rem 0 .8rem 0; margin-bottom: 1.2rem; }
+  .chip-row{ gap:.35rem; }
+  .chip{ padding:.28rem .55rem; }
+  .manuscript{ --tilt: 0deg !important; transform:none !important; padding: 1.1rem 1rem; border-radius: 6px; }
+  .manuscript:hover{ transform: none !important; }
+  .stamp{
+    position: static;
+    display: inline-block;
+    margin-bottom: .7rem;
+    transform: rotate(-4deg) scale(1);
+    animation: none;
+    opacity: 1;
+  }
+  .manuscript h3{ padding-right: 0; }
+  .final-banner{ padding: .85rem 1rem; gap:.6rem; }
+  .copy-btn{ max-width: none; }
+}
+
+/* ---- Very narrow phones ---- */
+@media (max-width: 380px){
+  .masthead h1{ font-size: 1.5rem; letter-spacing: 0; }
+  .manuscript{ padding: .9rem .8rem; }
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ======================================================================
-# GRAPH DEFINITION  (unchanged logic from the source pipeline)
+# GRAPH DEFINITION  (unchanged logic from the source pipeline, except
+# both the writer and the reviewer now run on Mistral)
 # ======================================================================
 
 class State(TypedDict):
@@ -573,10 +487,13 @@ def build_graph():
     search_tool = TavilySearch(max_results=3)
     tools = [search_tool]
 
-    writer_llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.7)
+    # Writer: fast, creative drafting model
+    writer_llm = ChatMistralAI(model="mistral-small-2506", temperature=0.7)
     writer_llm_with_tools = writer_llm.bind_tools(tools)
 
-    reviewer_llm = ChatMistralAI(model="mistral-small-2506", temperature=0.2)
+    # Reviewer: same provider (Mistral), larger model + low temperature
+    # for a stricter, more consistent editorial judgment
+    reviewer_llm = ChatMistralAI(model="mistral-large-latest", temperature=0.2)
 
     def writer_node(state: State) -> dict:
         attempt = state.get("attempt", 0) + 1
@@ -664,17 +581,10 @@ with st.sidebar:
     )
     max_attempts = st.slider("Max revision rounds", min_value=1, max_value=5, value=3)
 
-    _done = len(st.session_state.get("records", []))
-    _dots = "".join(
-        f"<div class='round-dot{' filled' if i < _done else ''}'></div>"
-        for i in range(max_attempts)
-    )
-    st.markdown(f"<div class='round-tracker'>{_dots}</div>", unsafe_allow_html=True)
-
     st.markdown("---")
     st.markdown(
-        "<span style='font-family:IBM Plex Mono; font-size:.7rem; letter-spacing:.1em; color:#7E9284;'>"
-        "WRITER · gemini-2.5-flash &nbsp;|&nbsp; EDITOR · mistral-small</span>",
+        "<span style='font-family:IBM Plex Mono; font-size:.7rem; letter-spacing:.1em; color:#7C8394;'>"
+        "WRITER · mistral-small &nbsp;|&nbsp; EDITOR · mistral-large</span>",
         unsafe_allow_html=True,
     )
 
@@ -694,7 +604,7 @@ st.markdown("""
 <div class="masthead">
   <h1>THE BYLINE DESK</h1>
   <div class="tagline">"publish nothing the editor hasn't signed off on"</div>
-  <div class="meta">Vol. I · Drafted by <b>Gemini</b> · Reviewed by <b>Mistral</b> · Sourced via Tavily</div>
+  <div class="meta">Vol. I · Drafted by Mistral · Reviewed by Mistral · Sourced via Tavily</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -771,8 +681,7 @@ if not records:
     <div class="empty-desk">
       <div class="glyph">🗞️</div>
       <h4>The desk is empty</h4>
-      <div class="sub">Waiting on tonight's story.</div>
-      <div class="hint">Type a topic in the sidebar → Send to the desk</div>
+      <div>Give it a topic in the sidebar and hit <em>Send to the desk</em>.</div>
     </div>
     """, unsafe_allow_html=True)
 else:
@@ -795,7 +704,7 @@ else:
         """, unsafe_allow_html=True)
     elif records:
         st.markdown("""
-        <div class="final-banner" style="background:linear-gradient(135deg,#2A0D0B,#000000); border-color:var(--reject);">
+        <div class="final-banner" style="background:linear-gradient(135deg,#5C221D,#33130F); border-color:var(--reject);">
           <div class="icon">⏳</div>
           <div class="txt" style="color:#F3D6D2;">MAX ROUNDS REACHED — editor still has notes. Best draft is below.</div>
         </div>
@@ -811,8 +720,6 @@ else:
         if not r["approved"]:
             redpen = f"""<div class="redpen"><span class="tag">Editor's note</span>{r['feedback']}</div>"""
 
-        word_count = len(r["draft"].split())
-
         st.markdown(f"""
         <div class="manuscript-wrap" style="--tilt:{tilt}deg;">
           <div class="manuscript" style="--tilt:{tilt}deg;">
@@ -821,18 +728,12 @@ else:
             <h3>{topic.strip() or 'Untitled draft'}</h3>
             <div class="body-text">{r['draft']}</div>
             {redpen}
-            <div class="wordcount">{word_count} words</div>
           </div>
         </div>
         """, unsafe_allow_html=True)
 
-    # Copy button for the best/final draft — st.code() ships its own
-    # reliable copy icon, so we don't hand-roll JS/HTML escaping.
-    st.markdown("<div class='label' style='margin-bottom:.3rem;'>Latest draft — click the copy icon on hover</div>", unsafe_allow_html=True)
-    st.code(records[-1]["draft"], language=None)
-    st.download_button(
-        "Download draft (.txt)",
-        data=records[-1]["draft"],
-        file_name=f"{(topic.strip() or 'draft').replace(' ', '_')[:40]}.txt",
-        mime="text/plain",
-    )
+    # Copy button for the best/final draft
+    best_draft = records[-1]["draft"].replace("`", "\\`").replace("\n", "\\n").replace("'", "\\'")
+    st.markdown(f"""
+    <button class="copy-btn" onclick="navigator.clipboard.writeText('{best_draft}')">📋 Copy latest draft</button>
+    """, unsafe_allow_html=True)
