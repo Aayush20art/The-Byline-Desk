@@ -65,6 +65,27 @@ html, body, [class*="css"]{
     radial-gradient(1100px 500px at 12% -10%, #1B2130 0%, transparent 60%),
     radial-gradient(900px 500px at 100% 0%, #1A2A24 0%, transparent 55%),
     var(--ink);
+  background-size: 140% 140%, 140% 140%, auto;
+  animation: deskGlowDrift 24s ease-in-out infinite;
+}
+.stApp::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  opacity: .035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  animation: grainFlicker 1.3s steps(2) infinite;
+}
+@keyframes deskGlowDrift{
+  0%, 100%{ background-position: 12% -10%, 100% 0%, 0 0; }
+  50%{ background-position: 19% -3%, 90% 8%, 0 0; }
+}
+@keyframes grainFlicker{
+  0%, 100%{ transform: translate(0,0); opacity: .03; }
+  50%{ transform: translate(-1%, 1%); opacity: .05; }
 }
 
 /* ---------------- Make Streamlit's own layout fluid ---------------- */
@@ -126,6 +147,25 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, background .25s ease;
   box-shadow: 0 2px 0 #8a6d16, 0 6px 14px rgba(0,0,0,.35);
   width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.stButton > button::after,
+.copy-btn::after,
+[data-testid="stDownloadButton"] button::after{
+  content:"";
+  position:absolute;
+  top:0; left:-60%;
+  width:35%; height:100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,.5), transparent);
+  transform: skewX(-20deg);
+  animation: btnShimmer 4.2s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes btnShimmer{
+  0%{ left:-60%; }
+  40%{ left:130%; }
+  100%{ left:130%; }
 }
 .stButton > button:hover{
   transform: translateY(-2px) scale(1.015);
@@ -153,6 +193,7 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   letter-spacing: .01em;
   margin: 0;
   line-height: 1.15;
+  text-shadow: 0 1px 0 rgba(0,0,0,.4), 0 0 22px rgba(201,162,39,.18);
 }
 .masthead .tagline{
   font-family: 'Source Serif 4', serif;
@@ -171,6 +212,41 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   margin-top: .7rem;
   padding: 0 .5rem;
   word-break: break-word;
+}
+.gold-glint{
+  height: 2px;
+  width: 100%;
+  max-width: 360px;
+  margin: .8rem auto 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  background-size: 200% 100%;
+  animation: glintSweep 3.4s linear infinite;
+  opacity: .8;
+}
+@keyframes glintSweep{
+  0%{ background-position: 200% 0; }
+  100%{ background-position: -200% 0; }
+}
+.wire-ticker{
+  overflow: hidden;
+  border-top: 1px solid var(--panel-line);
+  border-bottom: 1px solid var(--panel-line);
+  margin-top: 1rem;
+  padding: .35rem 0;
+  background: rgba(255,255,255,.02);
+}
+.wire-ticker-track{
+  display: inline-block;
+  white-space: nowrap;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: .62rem;
+  letter-spacing: .2em;
+  color: var(--muted);
+  animation: tickerScroll 28s linear infinite;
+}
+@keyframes tickerScroll{
+  0%{ transform: translateX(0); }
+  100%{ transform: translateX(-50%); }
 }
 @keyframes fadeDown{
   from{ opacity:0; transform: translateY(-14px); }
@@ -212,9 +288,27 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   background: var(--panel);
   transition: all .2s ease;
   white-space: nowrap;
+  animation: chipIn .45s cubic-bezier(.2,.8,.2,1) both;
 }
-.chip.approved{ border-color: var(--approve); color:#BFF0D6; background: rgba(62,139,99,.12); }
+.chip:nth-of-type(1){ animation-delay: .04s; }
+.chip:nth-of-type(2){ animation-delay: .11s; }
+.chip:nth-of-type(3){ animation-delay: .18s; }
+.chip:nth-of-type(4){ animation-delay: .25s; }
+.chip:nth-of-type(5){ animation-delay: .32s; }
+.chip:nth-of-type(n+6){ animation-delay: .38s; }
+@keyframes chipIn{
+  from{ opacity:0; transform: translateY(-6px) scale(.92); }
+  to{ opacity:1; transform: translateY(0) scale(1); }
+}
+.chip.approved{
+  border-color: var(--approve); color:#BFF0D6; background: rgba(62,139,99,.12);
+  animation: chipIn .45s cubic-bezier(.2,.8,.2,1) both, chipPulse 2.6s ease-in-out 1s infinite;
+}
 .chip.rejected{ border-color: var(--reject); color:#F3C7C2; background: rgba(193,68,58,.12); }
+@keyframes chipPulse{
+  0%, 100%{ box-shadow: 0 0 0 0 rgba(62,139,99,0); }
+  50%{ box-shadow: 0 0 0 3px rgba(62,139,99,.18); }
+}
 
 /* ---------------- Manuscript card ---------------- */
 .manuscript-wrap{
@@ -292,13 +386,20 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   animation: stampSlam .55s cubic-bezier(.2,1.4,.4,1) .15s forwards;
   mix-blend-mode: multiply;
 }
-.stamp.approved{ color: var(--approve-d); }
+.stamp.approved{
+  color: var(--approve-d);
+  animation: stampSlam .55s cubic-bezier(.2,1.4,.4,1) .15s forwards, stampPulse 2.6s ease-in-out 1s infinite;
+}
 .stamp.rejected{ color: var(--reject-d); }
 @keyframes stampSlam{
   0%{ opacity:0; transform: rotate(-11deg) scale(2.6); }
   60%{ opacity:1; transform: rotate(-11deg) scale(.92); }
   80%{ transform: rotate(-11deg) scale(1.06); }
   100%{ opacity:1; transform: rotate(-11deg) scale(1); }
+}
+@keyframes stampPulse{
+  0%, 100%{ box-shadow: 0 0 0 0 rgba(62,139,99,0); }
+  50%{ box-shadow: 0 0 16px 3px rgba(62,139,99,.3); }
 }
 
 /* Red-pen margin note */
@@ -331,13 +432,17 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   padding: 1rem 1.2rem;
   margin-bottom: 1.4rem;
   display:flex; align-items:center; gap:.8rem;
-  animation: fadeIn .4s ease both;
+  animation: fadeIn .4s ease both, bannerGlow 3.2s ease-in-out 1s infinite;
   flex-wrap: wrap;
+}
+@keyframes bannerGlow{
+  0%, 100%{ box-shadow: 0 0 0 0 rgba(62,139,99,0); }
+  50%{ box-shadow: 0 0 22px 2px rgba(62,139,99,.22); }
 }
 .final-banner .icon{ font-size: clamp(1.2rem, 3vw, 1.6rem); }
 .final-banner .txt{ font-family:'IBM Plex Mono', monospace; color:#D9F2E4; font-size: clamp(.72rem, 2vw, .85rem); letter-spacing:.04em; }
 
-.copy-btn{
+.copy-btn, [data-testid="stDownloadButton"] button{
   font-family:'IBM Plex Mono', monospace;
   font-size:.72rem;
   letter-spacing:.08em;
@@ -351,8 +456,12 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   transition: all .2s ease;
   width: 100%;
   max-width: 260px;
+  position: relative;
+  overflow: hidden;
 }
-.copy-btn:hover{ background: var(--gold); color:#171208; transform: translateY(-1px); }
+.copy-btn:hover, [data-testid="stDownloadButton"] button:hover{ background: var(--gold); color:#171208; transform: translateY(-1px); }
+[data-testid="stDownloadButton"] button{ max-width: 260px; }
+[data-testid="stDownloadButton"]{ display:flex; justify-content:flex-start; }
 
 /* Empty state */
 .empty-desk{
@@ -425,13 +534,25 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   }
   .manuscript h3{ padding-right: 0; }
   .final-banner{ padding: .85rem 1rem; gap:.6rem; }
-  .copy-btn{ max-width: none; }
+  .copy-btn, [data-testid="stDownloadButton"] button{ max-width: none; }
+  .wire-ticker-track{ font-size: .56rem; letter-spacing: .14em; }
+  .gold-glint{ max-width: 220px; }
 }
 
 /* ---- Very narrow phones ---- */
 @media (max-width: 380px){
   .masthead h1{ font-size: 1.5rem; letter-spacing: 0; }
   .manuscript{ padding: .9rem .8rem; }
+}
+
+/* ---- Respect reduced-motion preferences: keep entrance animations,
+   drop the ambient/decorative infinite ones ---- */
+@media (prefers-reduced-motion: reduce){
+  .stApp, .stApp::after, .gold-glint, .wire-ticker-track,
+  .stamp.approved, .chip.approved, .final-banner,
+  .stButton > button::after, .copy-btn::after, [data-testid="stDownloadButton"] button::after{
+    animation: none !important;
+  }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -493,7 +614,7 @@ def build_graph():
 
     # Reviewer: same provider (Mistral), larger model + low temperature
     # for a stricter, more consistent editorial judgment
-    reviewer_llm = ChatMistralAI(model="mistral-small-2506", temperature=0.2)
+    reviewer_llm = ChatMistralAI(model="mistral-large-latest", temperature=0.2)
 
     def writer_node(state: State) -> dict:
         existing_messages = state.get("messages", [])
@@ -617,8 +738,13 @@ with st.sidebar:
 st.markdown("""
 <div class="masthead">
   <h1>THE BYLINE DESK</h1>
+  <div class="gold-glint"></div>
   <div class="tagline">"publish nothing the editor hasn't signed off on"</div>
   <div class="meta">Vol. I · Drafted by Mistral · Reviewed by Mistral · Sourced via Tavily</div>
+  <div class="wire-ticker"><div class="wire-ticker-track">
+    PRESS ROOM LIVE&nbsp;&nbsp;·&nbsp;&nbsp;DRAFT&nbsp;·&nbsp;REVIEW&nbsp;·&nbsp;REVISE&nbsp;&nbsp;·&nbsp;&nbsp;WIRE SERVICE&nbsp;&nbsp;·&nbsp;&nbsp;THE BYLINE DESK&nbsp;&nbsp;·&nbsp;&nbsp;
+    PRESS ROOM LIVE&nbsp;&nbsp;·&nbsp;&nbsp;DRAFT&nbsp;·&nbsp;REVIEW&nbsp;·&nbsp;REVISE&nbsp;&nbsp;·&nbsp;&nbsp;WIRE SERVICE&nbsp;&nbsp;·&nbsp;&nbsp;THE BYLINE DESK&nbsp;&nbsp;·&nbsp;&nbsp;
+  </div></div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -724,9 +850,10 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
-    # Manuscript cards, most recent first
-    for r in reversed(records):
+    # Manuscript cards, most recent first, with a light cascading entrance
+    for i, r in enumerate(reversed(records)):
         tilt = -0.6 if r["attempt"] % 2 == 0 else 0.5
+        delay = min(i * 0.09, 0.45)
         stamp_cls = "approved" if r["approved"] else "rejected"
         stamp_txt = "Approved" if r["approved"] else "Rejected"
 
@@ -735,7 +862,7 @@ else:
             redpen = f"""<div class="redpen"><span class="tag">Editor's note</span>{r['feedback']}</div>"""
 
         st.markdown(f"""
-        <div class="manuscript-wrap" style="--tilt:{tilt}deg;">
+        <div class="manuscript-wrap" style="--tilt:{tilt}deg; animation-delay:{delay}s;">
           <div class="manuscript" style="--tilt:{tilt}deg;">
             <div class="stamp {stamp_cls}">{stamp_txt}</div>
             <div class="label">Revision {r['attempt']} of {max_attempts}</div>
@@ -746,8 +873,19 @@ else:
         </div>
         """, unsafe_allow_html=True)
 
-    # Copy button for the best/final draft
-    best_draft = records[-1]["draft"].replace("`", "\\`").replace("\n", "\\n").replace("'", "\\'")
-    st.markdown(f"""
-    <button class="copy-btn" onclick="navigator.clipboard.writeText('{best_draft}')">📋 Copy latest draft</button>
-    """, unsafe_allow_html=True)
+    # Copy + download for the best/final draft
+    best_draft_raw = records[-1]["draft"]
+    best_draft_js = best_draft_raw.replace("\\", "\\\\").replace("`", "\\`").replace("\n", "\\n").replace("'", "\\'")
+    col_copy, col_download = st.columns(2)
+    with col_copy:
+        st.markdown(f"""
+        <button class="copy-btn" onclick="navigator.clipboard.writeText('{best_draft_js}')">📋 Copy latest draft</button>
+        """, unsafe_allow_html=True)
+    with col_download:
+        st.download_button(
+            label="⬇️ Download latest draft",
+            data=best_draft_raw,
+            file_name="linkedin_post.txt",
+            mime="text/plain",
+            use_container_width=True,
+        )
