@@ -7,7 +7,7 @@ from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 from langchain_groq import ChatGroq
-from langchain_tavily import TavilySearchResults
+from langchain_tavily import TavilySearch
 
 # ======================================================================
 # PAGE CONFIG
@@ -564,7 +564,7 @@ REVIEWER_SYSTEM_PROMPT = (
 
 @st.cache_resource(show_spinner=False)
 def build_graph():
-    search_tool = TavilySearchResults(max_results=3)
+    search_tool = TavilySearch(max_results=3)
     tools = [search_tool]
 
     # Writer: fast, creative drafting model via Groq
