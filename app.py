@@ -6,8 +6,8 @@ import streamlit as st
 from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
-from langchain_mistralai import ChatMistralAI
-from langchain_tavily import TavilySearch
+from langchain_groq import ChatGroq
+from langchain_community.tools.tavily_search import TavilySearchResults
 
 # ======================================================================
 # PAGE CONFIG
@@ -21,19 +21,19 @@ st.set_page_config(
 
 # ======================================================================
 # SECRETS -> ENV  (works locally via .env, and on Streamlit Cloud via
-# the Secrets panel — just add MISTRAL_API_KEY and TAVILY_API_KEY there
-# and this picks them up automatically)
+# the Secrets panel — just add GROQ_API_KEY and TAVILY_API_KEY there)
 # ======================================================================
-for _key in ("MISTRAL_API_KEY", "TAVILY_API_KEY"):
-    if _key in st.secrets:
-        os.environ[_key] = st.secrets[_key]
+try:
+    for _key in ("GROQ_API_KEY", "TAVILY_API_KEY"):
+        if _key in st.secrets:
+            os.environ[_key] = st.secrets[_key]
+except Exception:
+    pass
 
-MISSING_KEYS = [k for k in ("MISTRAL_API_KEY", "TAVILY_API_KEY") if not os.environ.get(k)]
+MISSING_KEYS = [k for k in ("GROQ_API_KEY", "TAVILY_API_KEY") if not os.environ.get(k)]
 
 # ======================================================================
-# STYLE — "The Byline Desk": a newsroom copy-desk where an AI writer
-# drafts and a stricter AI editor won't sign off until it's right.
-# Fully responsive: phone (<576px), tablet (576-1024px), laptop (>1024px)
+# STYLE
 # ======================================================================
 st.markdown("""
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,7 +88,6 @@ html, body, [class*="css"]{
   50%{ transform: translate(-1%, 1%); opacity: .05; }
 }
 
-/* ---------------- Make Streamlit's own layout fluid ---------------- */
 .block-container{
   padding-left: 3rem;
   padding-right: 3rem;
@@ -101,7 +100,6 @@ img, .manuscript, .desk-log, .final-banner, .empty-desk{
   box-sizing: border-box;
 }
 
-/* ---------------- Sidebar: the desk drawer ---------------- */
 section[data-testid="stSidebar"]{
   background: linear-gradient(180deg, #14171F 0%, #10131A 100%);
   border-right: 1px solid var(--panel-line);
@@ -132,7 +130,6 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   box-shadow: 0 0 0 3px rgba(201,162,39,0.15);
 }
 
-/* ---------------- Buttons everywhere ---------------- */
 .stButton > button{
   font-family: 'IBM Plex Mono', monospace;
   font-size: 0.8rem;
@@ -177,7 +174,6 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   box-shadow: 0 1px 0 #8a6d16;
 }
 
-/* ---------------- Masthead ---------------- */
 .masthead{
   text-align:center;
   padding: 1.6rem 0 1.1rem 0;
@@ -253,7 +249,6 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   to{ opacity:1; transform: translateY(0); }
 }
 
-/* ---------------- Status ticker while the graph runs ---------------- */
 .desk-log{
   font-family:'IBM Plex Mono', monospace;
   font-size: clamp(.74rem, 2vw, .84rem);
@@ -275,7 +270,6 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 @keyframes blink{ 50%{ opacity:0; } }
 @keyframes fadeIn{ from{opacity:0; transform: translateY(6px);} to{opacity:1; transform:translateY(0);} }
 
-/* ---------------- Revision chips ---------------- */
 .chip-row{ display:flex; gap:.5rem; margin: 0 0 1.1rem 0; flex-wrap:wrap; }
 .chip{
   font-family:'IBM Plex Mono', monospace;
@@ -310,7 +304,6 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   50%{ box-shadow: 0 0 0 3px rgba(62,139,99,.18); }
 }
 
-/* ---------------- Manuscript card ---------------- */
 .manuscript-wrap{
   position: relative;
   margin-bottom: 2.6rem;
@@ -369,7 +362,6 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   word-wrap: break-word;
 }
 
-/* Stamp */
 .stamp{
   position:absolute;
   top: 1.3rem; right: 1.6rem;
@@ -402,7 +394,6 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   50%{ box-shadow: 0 0 16px 3px rgba(62,139,99,.3); }
 }
 
-/* Red-pen margin note */
 .redpen{
   font-family: 'Caveat', cursive;
   color: #9c2b22;
@@ -424,7 +415,6 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   margin-bottom:.25rem;
 }
 
-/* Final approved banner */
 .final-banner{
   background: linear-gradient(135deg, var(--approve-d), #123326);
   border: 1px solid var(--approve);
@@ -463,7 +453,6 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 [data-testid="stDownloadButton"] button{ max-width: 260px; }
 [data-testid="stDownloadButton"]{ display:flex; justify-content:flex-start; }
 
-/* Empty state */
 .empty-desk{
   text-align:center;
   padding: clamp(2rem, 6vw, 3.2rem) 1rem;
@@ -475,7 +464,6 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 .empty-desk .glyph{ font-size: clamp(1.8rem, 5vw, 2.4rem); margin-bottom:.6rem; opacity:.7; }
 .empty-desk h4{ font-family:'Zilla Slab', serif; color:#D8DBE3; margin: 0 0 .3rem 0; font-size: clamp(1rem, 3vw, 1.2rem); }
 
-/* Key warning */
 .key-warning{
   font-family:'IBM Plex Mono', monospace;
   font-size:.78rem;
@@ -488,20 +476,8 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   word-wrap: break-word;
 }
 
-/* =====================================================================
-   BREAKPOINTS
-   Laptop/desktop  : > 1024px  (defaults above already target this)
-   Tablet (iPad)   : 577px - 1024px
-   Phone (iPhone)  : <= 576px
-   ===================================================================== */
-
-/* ---- Tablets (iPad portrait/landscape, small laptops) ---- */
 @media (max-width: 1024px){
-  .block-container{
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    padding-top: 1.2rem;
-  }
+  .block-container{ padding-left: 1.5rem; padding-right: 1.5rem; padding-top: 1.2rem; }
   .manuscript{ --tilt: 0deg !important; transform: none !important; }
   .manuscript:hover{ transform: translateY(-4px) !important; }
   .stamp{ top: 1rem; right: 1rem; transform: rotate(-8deg) scale(1.6); }
@@ -512,26 +488,14 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   }
 }
 
-/* ---- Phones (iPhone SE up to Pro Max, portrait & landscape) ---- */
 @media (max-width: 576px){
-  .block-container{
-    padding-left: .9rem;
-    padding-right: .9rem;
-    padding-top: .8rem;
-  }
+  .block-container{ padding-left: .9rem; padding-right: .9rem; padding-top: .8rem; }
   .masthead{ padding: 1.1rem 0 .8rem 0; margin-bottom: 1.2rem; }
   .chip-row{ gap:.35rem; }
   .chip{ padding:.28rem .55rem; }
   .manuscript{ --tilt: 0deg !important; transform:none !important; padding: 1.1rem 1rem; border-radius: 6px; }
   .manuscript:hover{ transform: none !important; }
-  .stamp{
-    position: static;
-    display: inline-block;
-    margin-bottom: .7rem;
-    transform: rotate(-4deg) scale(1);
-    animation: none;
-    opacity: 1;
-  }
+  .stamp{ position: static; display: inline-block; margin-bottom: .7rem; transform: rotate(-4deg) scale(1); animation: none; opacity: 1; }
   .manuscript h3{ padding-right: 0; }
   .final-banner{ padding: .85rem 1rem; gap:.6rem; }
   .copy-btn, [data-testid="stDownloadButton"] button{ max-width: none; }
@@ -539,14 +503,11 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
   .gold-glint{ max-width: 220px; }
 }
 
-/* ---- Very narrow phones ---- */
 @media (max-width: 380px){
   .masthead h1{ font-size: 1.5rem; letter-spacing: 0; }
   .manuscript{ padding: .9rem .8rem; }
 }
 
-/* ---- Respect reduced-motion preferences: keep entrance animations,
-   drop the ambient/decorative infinite ones ---- */
 @media (prefers-reduced-motion: reduce){
   .stApp, .stApp::after, .gold-glint, .wire-ticker-track,
   .stamp.approved, .chip.approved, .final-banner,
@@ -558,10 +519,8 @@ section[data-testid="stSidebar"] .stTextArea textarea:focus{
 """, unsafe_allow_html=True)
 
 # ======================================================================
-# GRAPH DEFINITION  (unchanged logic from the source pipeline, except
-# both the writer and the reviewer now run on Mistral)
+# GRAPH DEFINITION
 # ======================================================================
-
 class State(TypedDict):
     topic: str
     messages: Annotated[list, add_messages]
@@ -605,26 +564,21 @@ REVIEWER_SYSTEM_PROMPT = (
 
 @st.cache_resource(show_spinner=False)
 def build_graph():
-    search_tool = TavilySearch(max_results=3)
+    search_tool = TavilySearchResults(max_results=3)
     tools = [search_tool]
 
-    # Writer: fast, creative drafting model
-    writer_llm = ChatMistralAI(model="mistral-small-2506", temperature=0.7)
+    # Writer: fast, creative drafting model via Groq
+    writer_llm = ChatGroq(model="openai/gpt-oss-20b", temperature=0.7)
     writer_llm_with_tools = writer_llm.bind_tools(tools)
 
-    # Reviewer: same provider (Mistral), larger model + low temperature
-    # for a stricter, more consistent editorial judgment
-    reviewer_llm = ChatMistralAI(model="mistral-large-latest", temperature=0.2)
+    # Reviewer: stricter editorial judgment via Groq
+    reviewer_llm = ChatGroq(model="openai/gpt-oss-120b", temperature=0.2)
 
     def writer_node(state: State) -> dict:
         existing_messages = state.get("messages", [])
         last_message = existing_messages[-1] if existing_messages else None
 
-        # If we're coming straight back from a tool call, the model still
-        # owes us its actual draft (it only issued a search so far) — so
-        # resume the SAME conversation, including the tool results, instead
-        # of starting a brand-new message. This is what lets a search-backed
-        # draft actually get produced instead of leaving `draft` empty.
+        # If coming back from a tool call, resume conversation
         if last_message is not None and getattr(last_message, "type", None) == "tool":
             response = writer_llm_with_tools.invoke(
                 [("system", WRITER_SYSTEM_PROMPT)] + list(existing_messages)
@@ -637,15 +591,15 @@ def build_graph():
 
         if attempt == 1:
             user_message = (
-                f"Write a LinkedIn post on this topic {topic}"
-                f"if you need current info search the web first "
+                f"Write a LinkedIn post on this topic {topic} "
+                f"if you need current info search the web first"
             )
         else:
             user_message = (
-                f"your previous draft on '{topic}' was rejected"
+                f"Your previous draft on '{topic}' was rejected. "
                 f"Here is the reviewer's feedback \n\n {previous_feedback}\n\n"
-                f"Write a new, improved draft that fixes every issue mentiond"
-                f"do not repeat the same mistake"
+                f"Write a new, improved draft that fixes every issue mentioned. "
+                f"Do not repeat the same mistakes."
             )
         messages = [("system", WRITER_SYSTEM_PROMPT), ("human", user_message)]
         response = writer_llm_with_tools.invoke(messages)
@@ -660,7 +614,7 @@ def build_graph():
 
     def reviewer_node(state: State) -> dict:
         draft = state["draft"]
-        prompt = f"review this LinkedIn post draft : \n{draft}\ngive your reviews"
+        prompt = f"Review this LinkedIn post draft:\n{draft}\nGive your reviews."
         response = reviewer_llm.invoke([("system", REVIEWER_SYSTEM_PROMPT), ("human", prompt)])
         review_text = response.content.strip()
 
@@ -719,7 +673,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown(
         "<span style='font-family:IBM Plex Mono; font-size:.7rem; letter-spacing:.1em; color:#7C8394;'>"
-        "WRITER · mistral-small &nbsp;|&nbsp; EDITOR · mistral-large</span>",
+        "WRITER · llama-3.1-8b &nbsp;|&nbsp; EDITOR · llama-3.3-70b</span>",
         unsafe_allow_html=True,
     )
 
@@ -740,7 +694,7 @@ st.markdown("""
   <h1>THE BYLINE DESK</h1>
   <div class="gold-glint"></div>
   <div class="tagline">"publish nothing the editor hasn't signed off on"</div>
-  <div class="meta">Vol. I · Drafted by Mistral · Reviewed by Mistral · Sourced via Tavily</div>
+  <div class="meta">Vol. I · Drafted by Groq · Reviewed by Groq · Sourced via Tavily</div>
   <div class="wire-ticker"><div class="wire-ticker-track">
     PRESS ROOM LIVE&nbsp;&nbsp;·&nbsp;&nbsp;DRAFT&nbsp;·&nbsp;REVIEW&nbsp;·&nbsp;REVISE&nbsp;&nbsp;·&nbsp;&nbsp;WIRE SERVICE&nbsp;&nbsp;·&nbsp;&nbsp;THE BYLINE DESK&nbsp;&nbsp;·&nbsp;&nbsp;
     PRESS ROOM LIVE&nbsp;&nbsp;·&nbsp;&nbsp;DRAFT&nbsp;·&nbsp;REVIEW&nbsp;·&nbsp;REVISE&nbsp;&nbsp;·&nbsp;&nbsp;WIRE SERVICE&nbsp;&nbsp;·&nbsp;&nbsp;THE BYLINE DESK&nbsp;&nbsp;·&nbsp;&nbsp;
