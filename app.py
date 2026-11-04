@@ -694,7 +694,7 @@ st.markdown("""
   <h1>THE BYLINE DESK</h1>
   <div class="gold-glint"></div>
   <div class="tagline">"publish nothing the editor hasn't signed off on"</div>
-  <div class="meta">Vol. I · Drafted by Groq · Reviewed by Groq · Sourced via Tavily</div>
+  <div class="meta">Vol. I · Drafted by Groq · Reviewed by OpenAI · Sourced via Tavily</div>
   <div class="wire-ticker"><div class="wire-ticker-track">
     PRESS ROOM LIVE&nbsp;&nbsp;·&nbsp;&nbsp;DRAFT&nbsp;·&nbsp;REVIEW&nbsp;·&nbsp;REVISE&nbsp;&nbsp;·&nbsp;&nbsp;WIRE SERVICE&nbsp;&nbsp;·&nbsp;&nbsp;THE BYLINE DESK&nbsp;&nbsp;·&nbsp;&nbsp;
     PRESS ROOM LIVE&nbsp;&nbsp;·&nbsp;&nbsp;DRAFT&nbsp;·&nbsp;REVIEW&nbsp;·&nbsp;REVISE&nbsp;&nbsp;·&nbsp;&nbsp;WIRE SERVICE&nbsp;&nbsp;·&nbsp;&nbsp;THE BYLINE DESK&nbsp;&nbsp;·&nbsp;&nbsp;
