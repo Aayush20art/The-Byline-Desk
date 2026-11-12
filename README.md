@@ -132,7 +132,3 @@ streamlit run app.py
 ```
 
 ---
-
-## License
-
-MIT — feel free to fork, adapt, and build on it.
